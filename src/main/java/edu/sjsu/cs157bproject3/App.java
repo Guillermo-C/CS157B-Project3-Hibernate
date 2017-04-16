@@ -27,13 +27,15 @@ import org.hibernate.service.ServiceRegistryBuilder;
  * @author ninjamemo
  */
 public class App {
+    Scanner input = new Scanner(System.in);
     
-    public static void printSomething(){
-        System.out.println("\n\n\nFrom the printSomething()\n\n");
-    }
+    
+    Date date = new Date();
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
-//  Print the query results
-    public static void printQueryResults(List<?> list){
+    //  Print the query results.
+    public static void printQueryResults(Query query){
+            List<?> list = query.list();
             SalesTransactions result;
 
             for(int i = 0; i < list.size(); i++){
@@ -42,12 +44,52 @@ public class App {
             }
             
     }
-
+    
+    public SalesTransactions createNewRecord(){
+        
+        SalesTransactions sale = new SalesTransactions(); 
+        Date manualDate; 
+        String ProductName;
+        int quantity; 
+        double unit_cost;
+        double total_cost; 
+        
+        System.out.println("\nPlease enter date in yyyy/MM/dd format: ");
+        try {
+            //salesTrans.setDate(calendar.ge);
+            manualDate = dateFormat.parse(input.nextLine());
+            sale.setDate(manualDate);
+            
+        } catch (ParseException ex) {
+            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //sale.setDate(manualDate);
+        
+        System.out.println("\nPlease enter the product name: ");
+        ProductName = input.nextLine();
+        sale.setProductName(ProductName);
+        
+        System.out.println("\nPlease enter quantity: ");
+        quantity = input.nextInt();
+        sale.setQuantity(quantity);
+        
+        System.out.println("\nPlease enter unit cost: ");
+        unit_cost = input.nextDouble();
+        sale.setUnitCost(unit_cost);
+        
+        total_cost = quantity * unit_cost;
+        System.out.printf("\nTotal_cost will be $%.2f", total_cost);
+        sale.setTotalCost(total_cost);
+        
+        return sale;
+    }
 
     
     public static void main(String[] args){
         
-
+        App app = new App();
+                
+                
         Date date = new Date();
         Scanner input = new Scanner(System.in);
         
@@ -83,9 +125,7 @@ public class App {
         
         
         List<?> list = query.list();
-        SalesTransactions result = (SalesTransactions)list.get(0);
-        System.out.print("\nResult would be: \n");
-        System.out.println(result.getProductName());
+
         System.out.println("\nI guess after using toString would be: \n");
         System.out.print(salesTrans);
         //  End testing
@@ -94,14 +134,18 @@ public class App {
             result = (SalesTransactions)list.get(i);
             System.out.println(result);
         }*/
-
-        printSomething();
         
-        System.out.println("From the query results function");
-        printQueryResults(list);
+        //System.out.println("From the query results function");
+        //printQueryResults(query);
         
      
         //session.save(salesTrans);
+        
+        SalesTransactions newOne = app.createNewRecord();
+        
+        
+        session.save(newOne);
+        
         transaction.commit();
         session.close();
         
