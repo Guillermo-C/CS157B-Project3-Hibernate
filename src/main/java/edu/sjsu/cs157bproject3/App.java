@@ -68,6 +68,14 @@ public class App {
         return sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
     }
 
+    public Query findProduct(Session session){
+        System.out.println("\nEnter ProductName: ");
+        String ProductName = input.nextLine();
+        Query query  = session.createQuery("FROM Sales WHERE ProductName = :ProductName");
+        query.setParameter("ProductName", ProductName);
+        
+        return query;
+    }
     
     public static void main(String[] args){
         
@@ -85,7 +93,7 @@ public class App {
         
         //  Query for testing
         Query query = session.createQuery("FROM Sales WHERE Quantity = 1");
-   
+        
         //System.out.println("From the query results function");
         //printQueryResults(query);
         
@@ -97,6 +105,9 @@ public class App {
         
         //SalesTransactions something = new SalesTransactions("12/09/11", "something",2, 43.23);
         //session.save(something);
+        
+        Query query2 = app.findProduct(session);
+        printQueryResults(query2);
         
         transaction.commit();
         session.close();
