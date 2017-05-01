@@ -14,9 +14,15 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -42,19 +48,28 @@ import org.hibernate.service.ServiceRegistryBuilder;
  */
 public class App {
     
+    Map<String, String> Menu = new HashMap<String, String>();
+    
+    static LinkedHashMap<Integer,String> walooo = new LinkedHashMap<Integer,String>();
+    
     //  Ask for user input.
-    Scanner input = new Scanner(System.in);
+    static Scanner input = new Scanner(System.in);
 
     //  Print the query results.
     public static void printQueryResults(Query query){
             List<?> list = query.list();
-            SalesTransactions result;
-            System.out.println("\nResults:\n");
-            for(int i = 0; i < list.size(); i++){
-            result = (SalesTransactions)list.get(i);
-            System.out.println(result);
-            }
+            if(list.size() > 0){
+                SalesTransactions result;
+                System.out.println("\nResults:\n");
+                for(int i = 0; i < list.size(); i++){
+                result = (SalesTransactions)list.get(i);
+                System.out.println(result);
+                }
             System.out.println("\nEnd of results!\n");
+            }
+            else{
+                System.out.println("No records found with given criteria.\n");
+            }
             
     }
     
@@ -84,19 +99,22 @@ public class App {
         return sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
     }
 
+    
     //  Look for records of a particular name
-    public Query findProduct(Session session){
+    public static Query findProduct(Session session){
         
+
         System.out.println("\nEnter ProductName: ");
         String ProductName = input.nextLine();
+
         Query query  = session.createQuery("FROM Sales WHERE ProductName = :ProductName");
         query.setParameter("ProductName", ProductName);
-        
+
         return query;
     }
     
     //  Look for records within a time interval
-    public Query findProductWTimeInterval(Session session) throws IllegalArgumentException{
+    public final Query findProductWTimeInterval(Session session) throws IllegalArgumentException{
         
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd"); 
         Date dateX = new Date();
@@ -125,52 +143,95 @@ public class App {
         return query;
     }
     
-    public Query getAll(Session session){
-        Query query = session.createQuery("FROM Sales");
-        return query;
+    
+    public static final Query getAllRecords(Session session){
+            
+    Query query = session.createQuery("FROM Sales");
+
+    return query;
+    
     }
     
-    public static void main(String[] args){
+    
+    public App(){
+        walooo.put(0, "Show all records");
+        walooo.put(1, "Find product (by ProductName)");
+        walooo.put(2, "Find records in a time interval");
+
+    }  
+    
+    public static void presentMenu(Map<Integer, String> map){
         
-        App app = new App();       
+        Set set = walooo.entrySet();
+        Iterator it = set.iterator();
+
+        while(it.hasNext()){
+            Map.Entry<Integer, String> menu = (Map.Entry<Integer, String>)it.next();
+            int key = menu.getKey();
+            String value = menu.getValue();
+            System.out.println(key + "\t" + value);
+        }
+        
+    }
+
+
+    public static synchronized void executeMenu(int choice, Session session){
+        Thread thread = new Thread();
+        ReentrantLock lock = new ReentrantLock();
+        Query query;
+        switch(choice){
+            case 0: query = getAllRecords(session);
+                    printQueryResults(query);
+                    break;
+                    
+            case 1: query = findProduct(session);
+                    printQueryResults(query);
+                    break;
+            
+            default: break;              
+        }
+    }
+    
+    public static void DoMenu(Map<Integer, String> map, Session session){
+        int choiceInt = 0;
+
+        System.out.println("Enter a number from the available options (enter -1 to exit): ");
+        while(choiceInt != -1){
+            
+                presentMenu(map);
+                System.out.println("Enter number: ");
+                choiceInt = input.nextInt();
+                input.nextLine();
+                executeMenu(choiceInt, session);  
+        
+        }
+    }
+    
+
+    
+    public static void main(String[] args){
+
         
         Configuration con = new Configuration().configure().addAnnotatedClass(SalesTransactions.class);
         
         ServiceRegistry reg = new ServiceRegistryBuilder().applySettings(con.getProperties()).buildServiceRegistry();
         
-        SessionFactory sf = con.buildSessionFactory(reg);
+        SessionFactory sf = con.buildSessionFactory(reg);     
         
         Session session = sf.openSession();
-        
+        App app = new App();
         Transaction transaction = session.beginTransaction();
-        
-        //  Query for testing
-        //Query query = session.createQuery("FROM Sales WHERE Quantity = 1");
-        
-        //System.out.println("From the query results function");
-        //printQueryResults(query);
-        
-        //  End testing
-
-        
-        //SalesTransactions newOne = app.createNewRecord();     
-        //session.save(newOne);
-        
+      
         //SalesTransactions something = new SalesTransactions("12/09/19", "Yes",2, 43.23);
         
-        
-        /*EntityManagerFactory emfactory = Persistence.createEntityManagerFactory("edu.sjsu_CS157BProject3_jar_1.0-SNAPSHOTPU"); 
-        EntityManager em = emfactory.createEntityManager(); 
-        Query queryx = app.findProductWTimeInterval(session, em);*/
         //session.save(something);
         
-        /*Query query2 = app.findProduct(session);
-        printQueryResults(query2);
-
-        Query query3 = app.findProductWTimeInterval(session);
-        printQueryResults(query3);*/
+        //walooo.put("0: show all", session.createQuery("From Sales"));
+        //app.presentMenu(walooo);
         
-
+        DoMenu(walooo, session);
+        //executeMenu(walooo, session);
+        
         
         transaction.commit();
         session.close();
