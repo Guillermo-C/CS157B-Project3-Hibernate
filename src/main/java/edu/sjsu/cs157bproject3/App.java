@@ -48,9 +48,11 @@ import org.hibernate.service.ServiceRegistryBuilder;
  */
 public class App {
     
-    Map<String, String> Menu = new HashMap<String, String>();
-    
-    static LinkedHashMap<Integer,String> walooo = new LinkedHashMap<Integer,String>();
+
+    /*  Mapping of menu, Integer used for index and String used for menu 
+        description of a particular index     
+    */
+    static LinkedHashMap<Integer,String> Menu = new LinkedHashMap<Integer,String>();
     
     //  Ask for user input.
     static Scanner input = new Scanner(System.in);
@@ -72,9 +74,9 @@ public class App {
             }
             
     }
-    
+            
     //  Create new record entering values manually.
-    public SalesTransactions createNewRecord(){
+    public static void createNewRecord(Session session){
         
         SalesTransactions sale;
         String manualDate, ProductName;
@@ -96,7 +98,10 @@ public class App {
         total_cost = quantity * unit_cost;
         System.out.printf("\nTotal_cost will be $%.2f", total_cost);
         
-        return sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
+        sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
+        
+        session.save(sale);
+        //return sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
     }
 
     
@@ -143,26 +148,30 @@ public class App {
         return query;
     }
     
-    
+    //  Query to get all records from this session. 
     public static final Query getAllRecords(Session session){
             
-    Query query = session.createQuery("FROM Sales");
+        Query query = session.createQuery("FROM Sales");
 
     return query;
     
     }
     
-    
+    /*  Initialize the menu, the integer is the index and the String
+        is the description for that index. 
+    */
     public App(){
-        walooo.put(0, "Show all records");
-        walooo.put(1, "Find product (by ProductName)");
-        walooo.put(2, "Find records in a time interval");
+        Menu.put(0, "Show all records");
+        Menu.put(1, "Find product (by ProductName)");
+        Menu.put(2, "Find records in a time interval");
+        Menu.put(3, "Create a new record of type Sales");
 
     }  
     
+    //  Display the menu to the user. 
     public static void presentMenu(Map<Integer, String> map){
         
-        Set set = walooo.entrySet();
+        Set set = Menu.entrySet();
         Iterator it = set.iterator();
 
         while(it.hasNext()){
@@ -174,10 +183,8 @@ public class App {
         
     }
 
-
-    public static synchronized void executeMenu(int choice, Session session){
-        Thread thread = new Thread();
-        ReentrantLock lock = new ReentrantLock();
+    //  Execute the menu based on the user's choice. 
+    public static void executeMenu(int choice, Session session){
         Query query;
         switch(choice){
             case 0: query = getAllRecords(session);
@@ -188,10 +195,18 @@ public class App {
                     printQueryResults(query);
                     break;
             
+            case 3: createNewRecord(session);
+                    query = getAllRecords(session);
+                    printQueryResults(query);
+                    break;
+            
             default: break;              
         }
     }
     
+    /*  Display the menu, execute the query of the user's choice and quit if -1
+        is entered.
+    */
     public static void DoMenu(Map<Integer, String> map, Session session){
         int choiceInt = 0;
 
@@ -207,10 +222,10 @@ public class App {
         }
     }
     
-
     
     public static void main(String[] args){
 
+        App app = new App(); 
         
         Configuration con = new Configuration().configure().addAnnotatedClass(SalesTransactions.class);
         
@@ -219,18 +234,16 @@ public class App {
         SessionFactory sf = con.buildSessionFactory(reg);     
         
         Session session = sf.openSession();
-        App app = new App();
+        
         Transaction transaction = session.beginTransaction();
       
         //SalesTransactions something = new SalesTransactions("12/09/19", "Yes",2, 43.23);
         
         //session.save(something);
         
-        //walooo.put("0: show all", session.createQuery("From Sales"));
-        //app.presentMenu(walooo);
         
-        DoMenu(walooo, session);
-        //executeMenu(walooo, session);
+        DoMenu(Menu, session);
+        
         
         
         transaction.commit();
