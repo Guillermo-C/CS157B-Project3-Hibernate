@@ -6,32 +6,17 @@
 package edu.sjsu.cs157bproject3;
 
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.TemporalType;
-import static javax.persistence.TemporalType.DATE;
-import javax.persistence.TypedQuery;
-import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -48,7 +33,16 @@ import org.hibernate.service.ServiceRegistryBuilder;
  */
 public class App {
     
-
+    /*  Initialize the menu, the integer is the index and the String
+        is the description for that index. 
+    */
+    public App(){
+        Menu.put(0, "Show all records");
+        Menu.put(1, "Find product (by ProductName)");
+        Menu.put(2, "Find records in a time interval");
+        Menu.put(3, "Create a new record of type Sales");
+    }  
+    
     /*  Mapping of menu, Integer used for index and String used for menu 
         description of a particular index     
     */
@@ -57,7 +51,26 @@ public class App {
     //  Ask for user input.
     static Scanner input = new Scanner(System.in);
 
+    
+    //  Methods   
+    
     //  Print the query results.
+    
+    //  Display the menu to the user. 
+    public static void presentMenu(Map<Integer, String> map){
+        
+        Set set = Menu.entrySet();
+        Iterator it = set.iterator();
+
+        while(it.hasNext()){
+            Map.Entry<Integer, String> menu = (Map.Entry<Integer, String>)it.next();
+            int key = menu.getKey();
+            String value = menu.getValue();
+            System.out.println(key + "\t" + value);
+        }
+        
+    }
+    
     public static void printQueryResults(Query query){
             List<?> list = query.list();
             if(list.size() > 0){
@@ -73,6 +86,27 @@ public class App {
                 System.out.println("No records found with given criteria.\n");
             }
             
+    }
+    
+    //  Execute the menu based on the user's choice. 
+    public static void executeMenu(int choice, Session session){
+        Query query;
+        switch(choice){
+            case 0: query = getAllRecords(session);
+                    printQueryResults(query);
+                    break;
+                    
+            case 1: query = findProduct(session);
+                    printQueryResults(query);
+                    break;
+            
+            case 3: createNewRecord(session);
+                    query = getAllRecords(session);
+                    printQueryResults(query);
+                    break;
+            
+            default: break;              
+        }
     }
             
     //  Create new record entering values manually.
@@ -103,7 +137,29 @@ public class App {
         session.save(sale);
         //return sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
     }
+    
+    /*  Display the menu, execute the query of the user's choice and quit if -1
+        is entered.
+    */
+    public static void DoMenu(Map<Integer, String> map, Session session){
+        int choiceInt = 0;
 
+        System.out.println("Enter a number from the available options (enter -1 to exit): ");
+        while(choiceInt != -1){
+            
+                presentMenu(map);
+                System.out.println("Enter number: ");
+                choiceInt = input.nextInt();
+                input.nextLine();
+                executeMenu(choiceInt, session);  
+        
+        }
+    }
+    
+    //  End of Methods
+    
+    
+    //  Query Methods
     
     //  Look for records of a particular name
     public static Query findProduct(Session session){
@@ -157,72 +213,9 @@ public class App {
     
     }
     
-    /*  Initialize the menu, the integer is the index and the String
-        is the description for that index. 
-    */
-    public App(){
-        Menu.put(0, "Show all records");
-        Menu.put(1, "Find product (by ProductName)");
-        Menu.put(2, "Find records in a time interval");
-        Menu.put(3, "Create a new record of type Sales");
+    //  End of Query Methods
 
-    }  
-    
-    //  Display the menu to the user. 
-    public static void presentMenu(Map<Integer, String> map){
-        
-        Set set = Menu.entrySet();
-        Iterator it = set.iterator();
-
-        while(it.hasNext()){
-            Map.Entry<Integer, String> menu = (Map.Entry<Integer, String>)it.next();
-            int key = menu.getKey();
-            String value = menu.getValue();
-            System.out.println(key + "\t" + value);
-        }
-        
-    }
-
-    //  Execute the menu based on the user's choice. 
-    public static void executeMenu(int choice, Session session){
-        Query query;
-        switch(choice){
-            case 0: query = getAllRecords(session);
-                    printQueryResults(query);
-                    break;
-                    
-            case 1: query = findProduct(session);
-                    printQueryResults(query);
-                    break;
-            
-            case 3: createNewRecord(session);
-                    query = getAllRecords(session);
-                    printQueryResults(query);
-                    break;
-            
-            default: break;              
-        }
-    }
-    
-    /*  Display the menu, execute the query of the user's choice and quit if -1
-        is entered.
-    */
-    public static void DoMenu(Map<Integer, String> map, Session session){
-        int choiceInt = 0;
-
-        System.out.println("Enter a number from the available options (enter -1 to exit): ");
-        while(choiceInt != -1){
-            
-                presentMenu(map);
-                System.out.println("Enter number: ");
-                choiceInt = input.nextInt();
-                input.nextLine();
-                executeMenu(choiceInt, session);  
-        
-        }
-    }
-    
-    
+ 
     public static void main(String[] args){
 
         App app = new App(); 
@@ -236,17 +229,11 @@ public class App {
         Session session = sf.openSession();
         
         Transaction transaction = session.beginTransaction();
-      
-        //SalesTransactions something = new SalesTransactions("12/09/19", "Yes",2, 43.23);
-        
-        //session.save(something);
-        
         
         DoMenu(Menu, session);
         
-        
-        
         transaction.commit();
+        
         session.close();
         
     }
