@@ -31,6 +31,7 @@ import org.hibernate.service.ServiceRegistryBuilder;
  *
  * @author ninjamemo
  */
+// Something
 public class App {
     
     /*  Initialize the menu, the integer is the index and the String
@@ -41,6 +42,7 @@ public class App {
         Menu.put(1, "Find product (by ProductName)");
         Menu.put(2, "Find records in a time interval");
         Menu.put(3, "Create a new record of type Sales");
+        Menu.put(4, "Find products sold last month");
     }  
     
     /*  Mapping of menu, Integer used for index and String used for menu 
@@ -100,11 +102,19 @@ public class App {
                     printQueryResults(query);
                     break;
             
+            case 2: query = findProductWTimeInterval(session);
+                    printQueryResults(query);           
+                    break;
+                    
             case 3: createNewRecord(session);
                     query = getAllRecords(session);
                     printQueryResults(query);
                     break;
             
+            case 4: query = soldLastMonth(session);
+                    printQueryResults(query);
+                    break;
+                    
             default: break;              
         }
     }
@@ -175,7 +185,7 @@ public class App {
     }
     
     //  Look for records within a time interval
-    public final Query findProductWTimeInterval(Session session) throws IllegalArgumentException{
+    public static final Query findProductWTimeInterval(Session session) throws IllegalArgumentException{
         
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd"); 
         Date dateX = new Date();
@@ -211,6 +221,13 @@ public class App {
 
     return query;
     
+    }
+    
+    public static Query soldLastMonth(Session session){
+        Query query = session.createQuery("SELECT *" +
+                                          "FROM Sales" +
+                                          "WHERE MONTH(Date_id) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
+        return query;
     }
     
     //  End of Query Methods

@@ -31,8 +31,7 @@ public class SalesTransactions {
      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");  
      
         try {
-            
-            this.date = dateFormat.parse(date);
+            this.date = dateFormat.parse(date);            
         } catch (ParseException ex) {
            System.out.println("Error parsing date!");
         }
@@ -124,7 +123,7 @@ public class SalesTransactions {
     }
    
     
-
+    //  Use toString() to print objects of type SalesTransactions
     @Override
     public String toString() {
         return "SalesTransactions{" + "date=" + date + ", ProductName=" + ProductName + ", Quantity=" + Quantity + ", UnitCost=" + UnitCost + ", TotalCost=" + TotalCost + '}';
