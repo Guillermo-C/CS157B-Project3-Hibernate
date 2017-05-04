@@ -43,8 +43,8 @@ Contributor(s):
   <session-factory>
     <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-    <property name="hibernate.connection.username"></property>
-    <property name="hibernate.connection.password"></property>
+    <property name="hibernate.connection.username">asdfghj</property>
+    <property name="hibernate.connection.password">sdfghj</property>
     <property name="format_sql">true</property>
     <property name="hibernate.connection.url"></property>
   </session-factory>

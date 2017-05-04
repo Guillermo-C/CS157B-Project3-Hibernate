@@ -32,6 +32,7 @@ import org.hibernate.service.ServiceRegistryBuilder;
  * @author ninjamemo
  */
 // Something
+// Something again
 public class App {
     
     /*  Initialize the menu, the integer is the index and the String

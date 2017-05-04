@@ -20,6 +20,8 @@ import javax.persistence.TemporalType;
  * @author ninjamemo
  */
 
+//change
+
 //  Table name is "Sales"
 @Entity(name = "Sales")
 public class SalesTransactions {
