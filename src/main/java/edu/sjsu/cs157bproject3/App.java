@@ -225,9 +225,7 @@ public class App {
     }
     
     public static Query soldLastMonth(Session session){
-        Query query = session.createQuery("SELECT *" +
-                                          "FROM Sales" +
-                                          "WHERE MONTH(Date_id) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
+        Query query = session.createQuery("SELECT s FROM Sales s WHERE MONTH(Date_id) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
         return query;
     }
     
