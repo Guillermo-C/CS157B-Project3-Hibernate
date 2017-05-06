@@ -8,6 +8,7 @@ package edu.sjsu.cs157bproject3;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -44,6 +45,7 @@ public class App {
         Menu.put(2, "Find records in a time interval");
         Menu.put(3, "Create a new record of type Sales");
         Menu.put(4, "Find products sold last month");
+        Menu.put(5, "Find the product with most sales");
     }  
     
     /*  Mapping of menu, Integer used for index and String used for menu 
@@ -113,6 +115,9 @@ public class App {
                     break;
             
             case 4: query = soldLastMonth(session);
+                    printQueryResults(query);
+                    break;
+            case 5: query = prodcutWMostSales(session);
                     printQueryResults(query);
                     break;
                     
@@ -225,7 +230,24 @@ public class App {
     }
     
     public static Query soldLastMonth(Session session){
-        Query query = session.createQuery("SELECT s FROM Sales s WHERE MONTH(Date_id) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
+        LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        LocalDate currentMonth = LocalDate.now();
+        Date lastMonthAsDate = java.sql.Date.valueOf(lastMonth);
+        Date currentMonthAsDate = java.sql.Date.valueOf(currentMonth);
+        System.out.println("\nCurrenty looking with:" + lastMonthAsDate.toString() + "\n");
+        System.out.println("\ncurrentMonthAsDate:" + currentMonthAsDate.toString() + "\n");
+        Query query = session.createQuery("SELECT s FROM Sales s WHERE Date_id BETWEEN :from AND :to ");
+        query.setDate("from", lastMonthAsDate);
+        query.setDate("to", currentMonthAsDate);
+        
+        return query;
+    }
+    
+    public static Query prodcutWMostSales(Session session){
+        int number = 1;
+        Query query = session.createQuery("SELECT s " + "FROM Sales s WHERE s.Quantity > :number AND s.ProductName IN (SELECT s.ProductName FROM Sales s GROUP BY s.ProductName)");
+        query.setParameter("number", number);
+        
         return query;
     }
     
