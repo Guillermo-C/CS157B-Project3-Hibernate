@@ -50,6 +50,10 @@ public class App {
         Menu.put(7, "Total number of units sold");
         Menu.put(8, "Transaction(s) with highest TotalCost");
         Menu.put(9, "Sale(s) with smallest TotalCost");
+        Menu.put(10, "Show all sales ordered by Month");
+        Menu.put(11, "Show all sales ordered by Year");
+        Menu.put(12, "Find the product with least sales");
+        
     }  
     
     /*  Mapping of menu, Integer used for index and String used for menu 
@@ -111,12 +115,10 @@ public class App {
                     
             case 1: query = findProduct(session);
                     printQueryResults(query);
-                    break;
-            
+                    break;           
             case 2: query = findProductWTimeInterval(session);
                     printQueryResults(query);           
-                    break;
-                    
+                    break;                 
             case 3: createNewRecord(session);
                     query = getAllRecords(session);
                     printQueryResults(query);
@@ -138,6 +140,15 @@ public class App {
                     break;
             case 9: query = saleWLeastTotalCost(session);
                     printQueryResults(query);
+                    break;
+            case 10: query = salesOrderedByMonth(session);
+                    printQueryResults(query);
+                    break;
+            case 11: query = salesOrderedByYear(session);
+                    printQueryResults(query);  
+                    break;
+            case 12: query = transWLeastUnitsSold(session);
+                     printQueryResults(query); 
                     break;
             default: break;              
         }
@@ -302,6 +313,24 @@ public class App {
         
     }
     
+    public static Query salesOrderedByMonth(Session session){
+        Query query = session.createQuery("SELECT s FROM Sales s ORDER BY Month(Date_id)");
+        return query;
+    }
+    
+    public static Query salesOrderedByYear(Session session){
+        Query query = session.createQuery("SELECT s FROM Sales s ORDER BY Year(Date_id)");
+        return query;
+    }
+    
+    public static Query transWLeastUnitsSold(Session session){
+        Query query = session.createQuery("SELECT s " +
+                                          "FROM Sales s " +
+                                          "WHERE s.Quantity = (SELECT MIN(s.Quantity) " +
+                                          "FROM Sales s)");
+
+        return query;
+    }
     //  End of Query Methods
 
  
