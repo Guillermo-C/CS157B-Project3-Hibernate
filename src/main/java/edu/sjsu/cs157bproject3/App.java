@@ -209,44 +209,34 @@ public class App {
         while(choiceInt != -1){
 
                 presentMenu(map);
-                //System.out.println("Enter number: ");
-                //choiceInt = input.nextInt();
-                //input.nextLine();
                 try{
-                    //Integer.parseInt(choiceInt);
-                    //presentMenu(map);
                     System.out.println("Enter number: ");
                     choiceInt = input.nextInt();
-                    //input.nextLine();
+                    input.nextLine();
                     executeMenu(choiceInt, session); 
                 }
                 catch(InputMismatchException e){
                     System.out.println("Check your input! Make sure you enter an integer available in the menu.\n");
+                    input.nextLine();
                 }
-                input.nextLine();
-                
-                
-                //  Bottom works, just commented out for testing.
-                //presentMenu(map);
-                //System.out.println("Enter number: ");
-                //choiceInt = input.nextInt();
                 //input.nextLine();
-                //executeMenu(choiceInt, session);  
         
         }
     }
     
+    
     //  End of Methods
+    
     
     
     //  Query Methods
     
-    //  Look for records of a particular name
+    //  Look for records of a particular name.
     public static Query findProduct(Session session){
         
-
         System.out.println("\nEnter ProductName: ");
         String ProductName = input.nextLine();
+        //input.nextLine();
 
         Query query  = session.createQuery("FROM Sales WHERE ProductName = :ProductName");
         query.setParameter("ProductName", ProductName);
