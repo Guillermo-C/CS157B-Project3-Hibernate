@@ -49,6 +49,7 @@ public class App {
         Menu.put(6, "Transaction with the most units sold");
         Menu.put(7, "Total number of units sold");
         Menu.put(8, "Transaction(s) with highest TotalCost");
+        Menu.put(9, "Sale(s) with smallest TotalCost");
     }  
     
     /*  Mapping of menu, Integer used for index and String used for menu 
@@ -119,8 +120,7 @@ public class App {
             case 3: createNewRecord(session);
                     query = getAllRecords(session);
                     printQueryResults(query);
-                    break;
-            
+                    break;            
             case 4: query = soldLastMonth(session);
                     printQueryResults(query);
                     break;
@@ -136,7 +136,9 @@ public class App {
             case 8: query = highestTotalCost(session);
                     printQueryResults(query);
                     break;
-                    
+            case 9: query = saleWLeastTotalCost(session);
+                    printQueryResults(query);
+                    break;
             default: break;              
         }
     }
@@ -285,8 +287,19 @@ public class App {
     public static Query highestTotalCost(Session session){
         Query query = session.createQuery("SELECT s " +
                                           "FROM Sales s " +
-                                          "WHERE s.TotalCost = (SELECT MAX(s.TotalCost) FROM Sales s)");
+                                          "WHERE s.TotalCost = (SELECT MAX(s.TotalCost) " + 
+                                                                "FROM Sales s)");
         return query;
+    }
+    
+    public static Query saleWLeastTotalCost(Session session){
+        Query query = session.createQuery("SELECT s " +
+                                          "FROM Sales s " + 
+                                          "WHERE s.TotalCost = (SELECT MIN(s.TotalCost) " + 
+                                          "FROM Sales s)");
+        
+        return query;
+        
     }
     
     //  End of Query Methods
