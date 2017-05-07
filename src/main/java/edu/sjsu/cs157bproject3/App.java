@@ -23,8 +23,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-
-
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 
@@ -34,7 +33,7 @@ import org.hibernate.service.ServiceRegistryBuilder;
  */
 // Something
 // Something again
-public class App {
+public class App { 
     
     /*  Initialize the menu, the integer is the index and the String
         is the description for that index. 
@@ -52,7 +51,7 @@ public class App {
         Menu.put(9, "Sale(s) with smallest TotalCost");
         Menu.put(10, "Show all sales ordered by Month");
         Menu.put(11, "Show all sales ordered by Year");
-        Menu.put(12, "Find the product with least sales");
+        Menu.put(12, "Find the transactions with single-unit sales");
         
     }  
     
@@ -120,8 +119,6 @@ public class App {
                     printQueryResults(query);           
                     break;                 
             case 3: createNewRecord(session);
-                    query = getAllRecords(session);
-                    printQueryResults(query);
                     break;            
             case 4: query = soldLastMonth(session);
                     printQueryResults(query);
@@ -156,11 +153,13 @@ public class App {
             
     //  Create new record entering values manually.
     public static void createNewRecord(Session session){
-        
-        SalesTransactions sale;
+        //SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        SalesTransactions sale = null;
         String manualDate, ProductName;
         int quantity; 
         double unit_cost, total_cost; 
+        boolean passed = false;
+        //Transaction trans = session.beginTransaction();
         
         System.out.println("\nPlease enter date in yyyy/MM/dd format: ");
         manualDate = input.nextLine();
@@ -176,11 +175,30 @@ public class App {
         
         total_cost = quantity * unit_cost;
         System.out.printf("\nTotal_cost will be $%.2f", total_cost);
+        System.out.println();
+        
         
         sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
+        try{
+            Transaction trans = session.beginTransaction();
+            //sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
+            //session.getTransaction().commit();
+            session.save(sale);
+            if(!session.getTransaction().wasCommitted()){
+                session.getTransaction().commit();
+            }
+            //session.getTransaction().commit();
+            System.out.println("\nNew record was saved!\n");
+            //session.flush();
+            //session.clear();
+
+        }
+        catch(ConstraintViolationException e){
+            System.out.println("\nPrimary key (date) is already being used!.\n");
+        }
+
+
         
-        session.save(sale);
-        //return sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
     }
     
     /*  Display the menu, execute the query of the user's choice and quit if -1
@@ -346,13 +364,14 @@ public class App {
         
         Session session = sf.openSession();
         
-        Transaction transaction = session.beginTransaction();
+        //Transaction transaction = session.beginTransaction();
         
         DoMenu(Menu, session);
         
-        transaction.commit();
+        //  Commented out just for testing
+        //transaction.commit();
         
-        session.close();
+        //session.close();
         
     }
 }
