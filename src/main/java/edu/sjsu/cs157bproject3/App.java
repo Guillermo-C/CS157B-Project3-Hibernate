@@ -46,6 +46,8 @@ public class App {
         Menu.put(3, "Create a new record of type Sales");
         Menu.put(4, "Find products sold last month");
         Menu.put(5, "Find the product with most sales");
+        Menu.put(6, "Transaction with the most units sold");
+        
     }  
     
     /*  Mapping of menu, Integer used for index and String used for menu 
@@ -117,8 +119,13 @@ public class App {
             case 4: query = soldLastMonth(session);
                     printQueryResults(query);
                     break;
-            case 5: query = prodcutWMostSales(session);
+            case 5: query = productWMostSales(session);
                     printQueryResults(query);
+                    break;
+            case 6: query = transWMostUnitsSold(session);
+                    printQueryResults(query);
+                    break;
+            case 7: 
                     break;
                     
             default: break;              
@@ -243,13 +250,23 @@ public class App {
         return query;
     }
     
-    public static Query prodcutWMostSales(Session session){
+    public static Query productWMostSales(Session session){
         int number = 1;
         Query query = session.createQuery("SELECT s " + "FROM Sales s WHERE s.Quantity > :number AND s.ProductName IN (SELECT s.ProductName FROM Sales s GROUP BY s.ProductName)");
         query.setParameter("number", number);
         
         return query;
     }
+    
+    public static Query transWMostUnitsSold(Session session){
+        Query query = session.createQuery("SELECT s " +
+                                          "FROM Sales s " +
+                                          "WHERE s.Quantity = (SELECT MAX(s.Quantity) " +
+                                          "FROM Sales s)");
+
+        return query;
+    }
+
     
     //  End of Query Methods
 
