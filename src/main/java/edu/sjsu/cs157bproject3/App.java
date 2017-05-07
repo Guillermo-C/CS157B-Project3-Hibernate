@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,13 +32,23 @@ import org.hibernate.service.ServiceRegistryBuilder;
  *
  * @author ninjamemo
  */
-// Something
-// Something again
+
+
 public class App { 
     
-    /*  Initialize the menu, the integer is the index and the String
-        is the description for that index. 
-    */
+    
+    //  Declaration of Variables
+    
+    
+    /*  Mapping of menu. Integer used for index and String used for menu 
+    description of a particular index. */
+    static LinkedHashMap<Integer,String> Menu = new LinkedHashMap<Integer,String>();
+    
+    //  Initialize scanner to ask for the user's input.
+    static Scanner input = new Scanner(System.in);
+    
+    /*  Initialize the menu. The integer is the index and the String
+        is the description for that index. */
     public App(){
         Menu.put(0, "Show all records");
         Menu.put(1, "Find product (by ProductName)");
@@ -55,18 +66,13 @@ public class App {
         
     }  
     
-    /*  Mapping of menu, Integer used for index and String used for menu 
-        description of a particular index     
-    */
-    static LinkedHashMap<Integer,String> Menu = new LinkedHashMap<Integer,String>();
     
-    //  Ask for user input.
-    static Scanner input = new Scanner(System.in);
-
+    //  End of Declaration of Variables
+    
+    
     
     //  Methods   
     
-    //  Print the query results.
     
     //  Display the menu to the user. 
     public static void presentMenu(Map<Integer, String> map){
@@ -78,11 +84,12 @@ public class App {
             Map.Entry<Integer, String> menu = (Map.Entry<Integer, String>)it.next();
             int key = menu.getKey();
             String value = menu.getValue();
-            System.out.println(key + "\t" + value);
+            System.out.println(key + "\t - " + value);
         }
         
     }
     
+    //  Print the query results.
     public static void printQueryResults(Query query){
             List<?> list = query.list();
             if(list.size() > 1){
@@ -91,7 +98,6 @@ public class App {
                 for(int i = 0; i < list.size(); i++){
                 result = (SalesTransactions)list.get(i);
                 System.out.println(result);
-                //System.out.println(list);
                 }
                 System.out.println("\nEnd of results!\n");
             }
@@ -99,7 +105,7 @@ public class App {
                 System.out.println("\nResults:\n"+ list.toString() +"\nEnd of results!\n");
             }
             else{
-                System.out.println("No records found with given criteria.\n");
+                System.out.println("No records found with the given criteria.\n");
             }
             
     }
@@ -110,8 +116,7 @@ public class App {
         switch(choice){
             case 0: query = getAllRecords(session);
                     printQueryResults(query);
-                    break;
-                    
+                    break;                 
             case 1: query = findProduct(session);
                     printQueryResults(query);
                     break;           
@@ -153,13 +158,11 @@ public class App {
             
     //  Create new record entering values manually.
     public static void createNewRecord(Session session){
-        //SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        
         SalesTransactions sale = null;
         String manualDate, ProductName;
         int quantity; 
         double unit_cost, total_cost; 
-        boolean passed = false;
-        //Transaction trans = session.beginTransaction();
         
         System.out.println("\nPlease enter date in yyyy/MM/dd format: ");
         manualDate = input.nextLine();
@@ -177,21 +180,17 @@ public class App {
         System.out.printf("\nTotal_cost will be $%.2f", total_cost);
         System.out.println();
         
-        
         sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
-        try{
+        
+        try{         
             Transaction trans = session.beginTransaction();
-            //sale = new SalesTransactions(manualDate, ProductName, quantity, unit_cost);
-            //session.getTransaction().commit();
             session.save(sale);
+            
             if(!session.getTransaction().wasCommitted()){
                 session.getTransaction().commit();
             }
-            //session.getTransaction().commit();
+            
             System.out.println("\nNew record was saved!\n");
-            //session.flush();
-            //session.clear();
-
         }
         catch(ConstraintViolationException e){
             System.out.println("\nPrimary key (date) is already being used!.\n");
@@ -202,19 +201,37 @@ public class App {
     }
     
     /*  Display the menu, execute the query of the user's choice and quit if -1
-        is entered.
-    */
+        is entered. */
     public static void DoMenu(Map<Integer, String> map, Session session){
         int choiceInt = 0;
 
         System.out.println("Enter a number from the available options (enter -1 to exit): ");
         while(choiceInt != -1){
-            
+
                 presentMenu(map);
-                System.out.println("Enter number: ");
-                choiceInt = input.nextInt();
+                //System.out.println("Enter number: ");
+                //choiceInt = input.nextInt();
+                //input.nextLine();
+                try{
+                    //Integer.parseInt(choiceInt);
+                    //presentMenu(map);
+                    System.out.println("Enter number: ");
+                    choiceInt = input.nextInt();
+                    //input.nextLine();
+                    executeMenu(choiceInt, session); 
+                }
+                catch(InputMismatchException e){
+                    System.out.println("Check your input! Make sure you enter an integer available in the menu.\n");
+                }
                 input.nextLine();
-                executeMenu(choiceInt, session);  
+                
+                
+                //  Bottom works, just commented out for testing.
+                //presentMenu(map);
+                //System.out.println("Enter number: ");
+                //choiceInt = input.nextInt();
+                //input.nextLine();
+                //executeMenu(choiceInt, session);  
         
         }
     }
