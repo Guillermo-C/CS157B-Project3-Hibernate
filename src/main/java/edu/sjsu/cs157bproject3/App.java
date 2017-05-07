@@ -48,6 +48,7 @@ public class App {
         Menu.put(5, "Find the product with most sales");
         Menu.put(6, "Transaction with the most units sold");
         Menu.put(7, "Total number of units sold");
+        Menu.put(8, "Transaction(s) with highest TotalCost");
     }  
     
     /*  Mapping of menu, Integer used for index and String used for menu 
@@ -130,6 +131,9 @@ public class App {
                     printQueryResults(query);
                     break;
             case 7: query = totalNumberOfUnitsSold(session);
+                    printQueryResults(query);
+                    break;
+            case 8: query = highestTotalCost(session);
                     printQueryResults(query);
                     break;
                     
@@ -274,7 +278,14 @@ public class App {
 
     public static Query totalNumberOfUnitsSold(Session session){
         Query query = session.createSQLQuery("SELECT SUM(s.Quantity) FROM Sales s");
-        //System.out.println(myList);
+        
+        return query;
+    }
+    
+    public static Query highestTotalCost(Session session){
+        Query query = session.createQuery("SELECT s " +
+                                          "FROM Sales s " +
+                                          "WHERE s.TotalCost = (SELECT MAX(s.TotalCost) FROM Sales s)");
         return query;
     }
     
