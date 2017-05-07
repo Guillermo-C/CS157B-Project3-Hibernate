@@ -47,7 +47,7 @@ public class App {
         Menu.put(4, "Find products sold last month");
         Menu.put(5, "Find the product with most sales");
         Menu.put(6, "Transaction with the most units sold");
-        
+        Menu.put(7, "Total number of units sold");
     }  
     
     /*  Mapping of menu, Integer used for index and String used for menu 
@@ -80,14 +80,18 @@ public class App {
     
     public static void printQueryResults(Query query){
             List<?> list = query.list();
-            if(list.size() > 0){
+            if(list.size() > 1){
                 SalesTransactions result;
                 System.out.println("\nResults:\n");
                 for(int i = 0; i < list.size(); i++){
                 result = (SalesTransactions)list.get(i);
                 System.out.println(result);
+                //System.out.println(list);
                 }
-            System.out.println("\nEnd of results!\n");
+                System.out.println("\nEnd of results!\n");
+            }
+            else if(list.size() == 1){
+                System.out.println("\nResults:\n"+ list.toString() +"\nEnd of results!\n");
             }
             else{
                 System.out.println("No records found with given criteria.\n");
@@ -125,7 +129,8 @@ public class App {
             case 6: query = transWMostUnitsSold(session);
                     printQueryResults(query);
                     break;
-            case 7: 
+            case 7: query = totalNumberOfUnitsSold(session);
+                    printQueryResults(query);
                     break;
                     
             default: break;              
@@ -267,6 +272,11 @@ public class App {
         return query;
     }
 
+    public static Query totalNumberOfUnitsSold(Session session){
+        Query query = session.createSQLQuery("SELECT SUM(s.Quantity) FROM Sales s");
+        //System.out.println(myList);
+        return query;
+    }
     
     //  End of Query Methods
 
