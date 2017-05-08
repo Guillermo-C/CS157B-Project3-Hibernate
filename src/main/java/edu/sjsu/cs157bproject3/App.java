@@ -5,7 +5,6 @@
  */
 package edu.sjsu.cs157bproject3;
 
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -27,6 +26,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
+
 
 /**
  *
@@ -209,6 +209,7 @@ public class App {
         while(choiceInt != -1){
 
                 presentMenu(map);
+                
                 try{
                     System.out.println("Enter number: ");
                     choiceInt = input.nextInt();
@@ -219,7 +220,6 @@ public class App {
                     System.out.println("Check your input! Make sure you enter an integer available in the menu.\n");
                     input.nextLine();
                 }
-                //input.nextLine();
         
         }
     }
@@ -231,20 +231,21 @@ public class App {
     
     //  Query Methods
     
-    //  Look for records of a particular name.
+    
+    //  Query method to look for records of a particular name.
     public static Query findProduct(Session session){
         
         System.out.println("\nEnter ProductName: ");
         String ProductName = input.nextLine();
-        //input.nextLine();
 
-        Query query  = session.createQuery("FROM Sales WHERE ProductName = :ProductName");
+        Query query  = session.createQuery("FROM Sales " +
+                                           "WHERE ProductName = :ProductName");
         query.setParameter("ProductName", ProductName);
 
         return query;
     }
     
-    //  Look for records within a time interval
+    //  Query method to look for records within a time interval
     public static final Query findProductWTimeInterval(Session session) throws IllegalArgumentException{
         
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd"); 
@@ -267,14 +268,17 @@ public class App {
         Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }     
         
-        Query query = session.createQuery("SELECT s FROM Sales s WHERE s.date BETWEEN :date0 AND :date1");
+        Query query = session.createQuery("SELECT s " + 
+                                          "FROM Sales s " + 
+                                          "WHERE s.date " + 
+                                          "BETWEEN :date0 AND :date1");
         query.setDate("date0", dateX);
         query.setDate("date1", dateY);
         
         return query;
     }
     
-    //  Query to get all records from this session. 
+    //  Query method to get all records from this session. 
     public static final Query getAllRecords(Session session){
             
         Query query = session.createQuery("FROM Sales");
@@ -283,84 +287,126 @@ public class App {
     
     }
     
+    //  Query method to get sales sold last month.
     public static Query soldLastMonth(Session session){
+        
         LocalDate lastMonth = LocalDate.now().minusMonths(1);
         LocalDate currentMonth = LocalDate.now();
         Date lastMonthAsDate = java.sql.Date.valueOf(lastMonth);
         Date currentMonthAsDate = java.sql.Date.valueOf(currentMonth);
-        System.out.println("\nCurrenty looking with:" + lastMonthAsDate.toString() + "\n");
-        System.out.println("\ncurrentMonthAsDate:" + currentMonthAsDate.toString() + "\n");
-        Query query = session.createQuery("SELECT s FROM Sales s WHERE Date_id BETWEEN :from AND :to ");
+        
+        Query query = session.createQuery("SELECT s " +
+                                          "FROM Sales s " + 
+                                          "WHERE Date_id " + 
+                                          "BETWEEN :from AND :to ");
         query.setDate("from", lastMonthAsDate);
         query.setDate("to", currentMonthAsDate);
         
         return query;
     }
     
+    //  Query method to find sales with most sales in terms of Quantity. 
     public static Query productWMostSales(Session session){
+       
         int number = 1;
-        Query query = session.createQuery("SELECT s " + "FROM Sales s WHERE s.Quantity > :number AND s.ProductName IN (SELECT s.ProductName FROM Sales s GROUP BY s.ProductName)");
+        Query query = session.createQuery("SELECT s " + 
+                                          "FROM Sales s " + 
+                                          "WHERE s.Quantity > :number " + 
+                                          "AND s.ProductName IN " + 
+                                                "(SELECT s.ProductName " + 
+                                                "FROM Sales s " + 
+                                                "GROUP BY s.ProductName)");
         query.setParameter("number", number);
         
         return query;
     }
     
+    //  Query method to find sales with most units sold. 
     public static Query transWMostUnitsSold(Session session){
+        
         Query query = session.createQuery("SELECT s " +
                                           "FROM Sales s " +
-                                          "WHERE s.Quantity = (SELECT MAX(s.Quantity) " +
-                                          "FROM Sales s)");
+                                          "WHERE s.Quantity = " +
+                                                "(SELECT MAX(s.Quantity) " +
+                                                "FROM Sales s)");
 
         return query;
     }
 
+    //  Query method to find the total number of units sold. 
     public static Query totalNumberOfUnitsSold(Session session){
-        Query query = session.createSQLQuery("SELECT SUM(s.Quantity) FROM Sales s");
+        
+        Query query = session.createSQLQuery("SELECT SUM(s.Quantity) " + 
+                                             "FROM Sales s");
         
         return query;
     }
     
+    //  Query method to find the sales with highest TotalCost.
     public static Query highestTotalCost(Session session){
+        
         Query query = session.createQuery("SELECT s " +
                                           "FROM Sales s " +
-                                          "WHERE s.TotalCost = (SELECT MAX(s.TotalCost) " + 
+                                          "WHERE s.TotalCost = " + 
+                                                   "(SELECT MAX(s.TotalCost) " + 
                                                                 "FROM Sales s)");
         return query;
     }
     
+    //  Query method to find the sales with least TotalCost.
     public static Query saleWLeastTotalCost(Session session){
+        
         Query query = session.createQuery("SELECT s " +
                                           "FROM Sales s " + 
-                                          "WHERE s.TotalCost = (SELECT MIN(s.TotalCost) " + 
-                                          "FROM Sales s)");
+                                          "WHERE s.TotalCost = " + 
+                                                   "(SELECT MIN(s.TotalCost) " + 
+                                                   "FROM Sales s)");
         
         return query;
         
     }
     
+    //  Query method to retrieve all sales ordered by month.
     public static Query salesOrderedByMonth(Session session){
-        Query query = session.createQuery("SELECT s FROM Sales s ORDER BY Month(Date_id)");
+        
+        Query query = session.createQuery("SELECT s " + 
+                                          "FROM Sales s " + 
+                                          "ORDER BY Month(Date_id)");
         return query;
     }
     
+    //  Query method to retrieve all sales ordered by year.
     public static Query salesOrderedByYear(Session session){
-        Query query = session.createQuery("SELECT s FROM Sales s ORDER BY Year(Date_id)");
+        
+        Query query = session.createQuery("SELECT s " + 
+                                          "FROM Sales s " + 
+                                          "ORDER BY Year(Date_id)");
         return query;
     }
     
+    //  Query method to retrieve all single-unit sales. 
     public static Query transWLeastUnitsSold(Session session){
+        
         Query query = session.createQuery("SELECT s " +
                                           "FROM Sales s " +
-                                          "WHERE s.Quantity = (SELECT MIN(s.Quantity) " +
-                                          "FROM Sales s)");
+                                          "WHERE s.Quantity = " + 
+                                                    "(SELECT MIN(s.Quantity) " +
+                                                    "FROM Sales s)");
 
         return query;
     }
+    
+    
     //  End of Query Methods
 
- 
-    public static void main(String[] args){
+    
 
+    // Main.
+    
+    
+    public static void main(String[] args){
+        
+        // Initialization of  variables. 
         App app = new App(); 
         
         Configuration con = new Configuration().configure().addAnnotatedClass(SalesTransactions.class);
@@ -371,14 +417,12 @@ public class App {
         
         Session session = sf.openSession();
         
-        //Transaction transaction = session.beginTransaction();
-        
         DoMenu(Menu, session);
-        
-        //  Commented out just for testing
-        //transaction.commit();
-        
-        //session.close();
-        
+
+        /* IGNORE these last lines of code. Here just for testing
+        Transaction transaction = session.beginTransaction();
+        transaction.commit();
+        session.close();
+        */
     }
 }
