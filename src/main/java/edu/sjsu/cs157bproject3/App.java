@@ -30,7 +30,8 @@ import org.hibernate.service.ServiceRegistryBuilder;
 
 /**
  *
- * @author ninjamemo
+ * @author Guillermo Colin
+ * CS 157B - Group 8
  */
 
 
@@ -416,6 +417,8 @@ public class App {
         SessionFactory sf = con.buildSessionFactory(reg);     
         
         Session session = sf.openSession();
+
+        System.out.println("\nWelcome!\n");
         
         DoMenu(Menu, session);
 

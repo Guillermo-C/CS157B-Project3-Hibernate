@@ -15,12 +15,14 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+
 /**
  *
- * @author ninjamemo
+ * @author Guillermo Colin
+ * Project 3 - Hibernate
+ * CS 157B - Group 8
  */
-
-//change
 
 //  Table name is "Sales"
 @Entity(name = "Sales")
@@ -31,22 +33,23 @@ public class SalesTransactions {
     SalesTransactions(String date, String ProductName, int Quantity, double UnitCost){
         
      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");  
-     
         try {
-            this.date = dateFormat.parse(date);            
+           this.date = dateFormat.parse(date);            
         } catch (ParseException ex) {
-           System.out.println("Error parsing date!");
+           System.out.println("\nError parsing date!\n");
         }
-        
+
         this.ProductName = ProductName;
         this.Quantity = Quantity; 
         this.UnitCost = UnitCost;
         this.TotalCost = (Quantity * UnitCost);
     }
     
+    
     //  Default constructor of the SalesTransaction object
     SalesTransactions(){
     }
+    
     
     //  Declaration of the attributes/columns of the table "Sales"
     @Id
@@ -65,7 +68,6 @@ public class SalesTransactions {
     
     @Column(name = "TotalCost")
     double TotalCost; 
-    
     
     
     //  Setters for the attributes of type SalesTransactions
@@ -99,7 +101,6 @@ public class SalesTransactions {
     public void setTotalCost(double TotalCost) {
         this.TotalCost = TotalCost;
     }
-
     
     
     
@@ -125,11 +126,14 @@ public class SalesTransactions {
     }
    
     
-    //  Use toString() to print objects of type SalesTransactions
+    //  Use toString() to print objects of type SalesTransactions.
     @Override
     public String toString() {
-        return "SalesTransactions{" + "date=" + date + ", ProductName=" + ProductName + ", Quantity=" + Quantity + ", UnitCost=" + UnitCost + ", TotalCost=" + TotalCost + '}';
+        return "SalesTransactions{" + "date=" + date + ", ProductName=" + 
+                ProductName + ", Quantity=" + Quantity + ", UnitCost=" + 
+                UnitCost + ", TotalCost=" + TotalCost + '}';
     }
+    
     
     
 }
